@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option go_package = "github.com/panagiotisptr/ping-pong/pong/proto";
+
+service Pong {
+    rpc GetCount(GetCountRequest) returns (GetCountResponse);
+}
+
+message GetCountRequest {}
+
+message GetCountResponse {
+    int64 count = 1;
+}
