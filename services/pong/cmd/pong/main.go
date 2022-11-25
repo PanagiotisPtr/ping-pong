@@ -34,7 +34,9 @@ func ProvidePongServer(
 	logger *zap.Logger,
 ) *PongServer {
 	return &PongServer{
-		logger: logger,
+		logger: logger.With(
+			zap.String("service", "pong"),
+		),
 	}
 }
 

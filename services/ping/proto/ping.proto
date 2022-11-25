@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option go_package = "github.com/panagiotisptr/ping-pong/ping/proto";
+
+service Ping {
+    rpc Call(CallRequest) returns (CallResponse);
+}
+
+message CallRequest{}
+
+message CallResponse {
+    int64 count = 1;
+}
