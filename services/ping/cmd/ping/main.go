@@ -36,8 +36,12 @@ func (s *PingServer) Call(ctx context.Context, req *proto.CallRequest) (*proto.C
 func ProvidePongClient(
 	lc fx.Lifecycle,
 ) (proto.PongClient, error) {
+	serviceAddress := os.Getenv("PONG_SERVICE_ADDRESS")
+	if serviceAddress == "" {
+		serviceAddress = "pong:80"
+	}
 	pongConn, err := grpc.Dial(
-		os.Getenv("PONG_SERVICE_ADDRESS"),
+		serviceAddress,
 		grpc.WithInsecure(),
 	)
 	if err != nil {
@@ -93,7 +97,12 @@ func Bootstrap(
 		OnStart: func(ctx context.Context) error {
 			logger.Sugar().Info("Starting GRPC server.")
 
-			addr := fmt.Sprintf(":%s", os.Getenv("SERVICE_PORT"))
+			port := os.Getenv("SERVICE_PORT")
+			if port == "" {
+				port = "80"
+			}
+
+			addr := fmt.Sprintf(":%s", port)
 			list, err := net.Listen("tcp", addr)
 			if err != nil {
 				return err

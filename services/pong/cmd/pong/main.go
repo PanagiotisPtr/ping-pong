@@ -69,7 +69,11 @@ func Bootstrap(
 		OnStart: func(ctx context.Context) error {
 			logger.Sugar().Info("Starting GRPC server.")
 
-			addr := fmt.Sprintf(":%s", os.Getenv("SERVICE_PORT"))
+			port := os.Getenv("SERVICE_PORT")
+			if port == "" {
+				port = "80"
+			}
+			addr := fmt.Sprintf(":%s")
 			list, err := net.Listen("tcp", addr)
 			if err != nil {
 				return err
