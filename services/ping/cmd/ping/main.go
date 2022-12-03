@@ -40,6 +40,7 @@ func ProvidePongClient(
 	if serviceAddress == "" {
 		serviceAddress = "pong:80"
 	}
+
 	pongConn, err := grpc.Dial(
 		serviceAddress,
 		grpc.WithInsecure(),
