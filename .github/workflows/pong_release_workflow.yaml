@@ -8,7 +8,7 @@ on:
       - 'services/pong/**'
 
 jobs:
-  docker:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -34,7 +34,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./services/pong
           file: ./services/pong/Dockerfile
           platforms: linux/amd64
           push: true
