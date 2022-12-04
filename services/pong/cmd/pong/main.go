@@ -73,6 +73,7 @@ func Bootstrap(
 			if port == "" {
 				port = "80"
 			}
+
 			addr := fmt.Sprintf(":%s", port)
 			list, err := net.Listen("tcp", addr)
 			if err != nil {
