@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  ping:
+  - apiVersion: v2
+    appVersion: d9c212e
+    created: "2022-12-05T22:02:44.890454329Z"
+    description: A Helm chart for Kubernetes
+    digest: 712cd581cd0f742c8769d594ca4b461c106cb92c880d1fd8d1a153f7cce6cc75
+    name: ping
+    type: application
+    urls:
+    - https://github.com/PanagiotisPtr/ping-pong/releases/download/ping-0.1.0/ping-0.1.0.tgz
+    version: 0.1.0
+generated: "2022-12-05T22:02:44.890465629Z"
