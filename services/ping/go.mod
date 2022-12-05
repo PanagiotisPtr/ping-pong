@@ -11,6 +11,9 @@ require (
 
 require (
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/magefile/mage v1.9.0 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	go.elastic.co/ecszap v1.0.1 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/dig v1.15.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect

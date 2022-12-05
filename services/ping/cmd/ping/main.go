@@ -7,6 +7,7 @@ import (
 	"os"
 	"panagiotisptr/ping-pong/ping/proto"
 
+	"go.elastic.co/ecszap"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
@@ -83,7 +84,9 @@ func ProvideGRPCServer(
 
 // Provides the ZAP logger
 func ProvideLogger() *zap.Logger {
-	logger, _ := zap.NewProduction()
+	encoderConfig := ecszap.NewDefaultEncoderConfig()
+	core := ecszap.NewCore(encoderConfig, os.Stdout, zap.DebugLevel)
+	logger := zap.New(core, zap.AddCaller())
 
 	return logger
 }
