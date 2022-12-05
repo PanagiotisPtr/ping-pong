@@ -2,7 +2,7 @@ replicaCount: 1
 image:
   repository: panagiotisptr/pong
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""
