@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "ping.fullname" . }}
   labels:
+    app: {{ include "pong.fullname" . | quote }}
     {{- include "ping.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
@@ -18,6 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
+        app: {{ include "pong.fullname" . | quote }}
         {{- include "ping.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
