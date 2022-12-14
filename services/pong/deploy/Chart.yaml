@@ -3,4 +3,4 @@ name: pong
 description: A Helm chart for the Pong service
 type: application
 version: 0.1.0
-appVersion: "3558c3a"
+appVersion: "8b0d0a9"
