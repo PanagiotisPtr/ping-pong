@@ -14,4 +14,3 @@ spec:
         - destination:
             host: ping.default.svc.cluster.local
             subset: v1
-          weight: 100
