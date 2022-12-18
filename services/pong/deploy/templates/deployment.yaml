@@ -4,6 +4,7 @@ metadata:
   name: {{ include "pong.fullname" . }}
   labels:
     app: {{ include "pong.fullname" . | quote }}
+    version: {{ .Chart.AppVersion | quote }}
     {{- include "pong.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
