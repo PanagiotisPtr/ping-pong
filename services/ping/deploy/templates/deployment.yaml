@@ -6,9 +6,7 @@ metadata:
     app: {{ include "ping.fullname" . | quote }}
     {{- include "ping.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
       {{- include "ping.selectorLabels" . | nindent 6 }}
