@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"panagiotisptr/ping-pong/ping/proto"
 
@@ -71,6 +72,23 @@ func ProvidePingServer(
 	}
 }
 
+func ProvideHTTPServer(
+	s *PingServer,
+) *http.ServeMux {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/call", func(w http.ResponseWriter, r *http.Request) {
+		res, err := s.Call(context.Background(), &proto.CallRequest{})
+		if err != nil {
+			w.Write([]byte(fmt.Sprintf("error: %v", err)))
+		} else {
+			w.Write([]byte(fmt.Sprintf("%d", res.GetCount())))
+		}
+	})
+
+	return mux
+}
+
 // Provides the GRPC server instance
 func ProvideGRPCServer(
 	s *PingServer,
@@ -94,6 +112,7 @@ func ProvideLogger() *zap.Logger {
 func Bootstrap(
 	lc fx.Lifecycle,
 	gs *grpc.Server,
+	mux *http.ServeMux,
 	logger *zap.Logger,
 ) {
 	logger.Sugar().Info("Starting ping service")
@@ -101,18 +120,26 @@ func Bootstrap(
 		OnStart: func(ctx context.Context) error {
 			logger.Sugar().Info("Starting GRPC server.")
 
-			port := os.Getenv("SERVICE_PORT")
-			if port == "" {
-				port = "80"
+			grpcPort := os.Getenv("SERVICE_GRPC_PORT")
+			if grpcPort == "" {
+				grpcPort = "80"
 			}
 
-			addr := fmt.Sprintf(":%s", port)
-			list, err := net.Listen("tcp", addr)
+			httpPort := os.Getenv("SERVICE_HTTP_PORT")
+			if httpPort == "" {
+				httpPort = "8888"
+			}
+
+			grpcAddr := fmt.Sprintf(":%s", grpcPort)
+			list, err := net.Listen("tcp", grpcAddr)
 			if err != nil {
 				return err
 			} else {
-				logger.Sugar().Info("Listening on " + addr)
+				logger.Sugar().Info("Listening on " + grpcAddr)
 			}
+
+			httpAddr := fmt.Sprintf(":%s", httpPort)
+			go http.ListenAndServe(httpAddr, mux)
 
 			go gs.Serve(list)
 
@@ -134,6 +161,7 @@ func main() {
 			ProvidePongClient,
 			ProvidePingServer,
 			ProvideGRPCServer,
+			ProvideHTTPServer,
 		),
 		fx.Invoke(Bootstrap),
 		fx.WithLogger(
