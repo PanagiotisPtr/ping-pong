@@ -4,11 +4,10 @@ metadata:
   name: {{ include "pong.fullname" . }}
   labels:
     app: {{ include "pong.fullname" . | quote }}
+    version: {{ .Chart.AppVersion | quote }}
     {{- include "pong.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
       {{- include "pong.selectorLabels" . | nindent 6 }}
@@ -36,7 +35,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: http
+            - name: grpc
               containerPort: 80
               protocol: TCP
           env:
