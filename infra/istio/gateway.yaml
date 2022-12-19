@@ -7,8 +7,8 @@ spec:
     istio: ingressgateway
   servers:
   - port:
-      number: 80
-      name: grpc
-      protocol: GRPC
+      number: 8888
+      name: http
+      protocol: HTTP
     hosts:
     - "*"

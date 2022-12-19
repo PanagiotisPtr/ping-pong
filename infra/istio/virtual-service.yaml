@@ -11,6 +11,6 @@ spec:
   - route:
     - destination:
         port:
-           number: 80 
+           number: 8888 
         host: ping.default.svc.cluster.local
         subset: v1
