@@ -21,7 +21,8 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 80
+  grpcPort: 80
+  httpPort: 8888
 
 resources: {}
 
