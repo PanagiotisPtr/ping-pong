@@ -4,13 +4,16 @@ metadata:
   name: grpc-vs
 spec:
   hosts:
-  - "*"
+    - "*"
   gateways:
-  - grpc-gateway
-  http:
-    - match:
-        - port: 80
-      route:
-        - destination:
-            host: ping.default.svc.cluster.local
-            subset: v1
+    - grpc-gateway
+  tcp:
+  - match:
+      - port: 80
+    route:
+    - destination:
+        port:
+           number: 80 
+        host: ping.default.svc.cluster.local
+        subset: v1
+      weight: 100
