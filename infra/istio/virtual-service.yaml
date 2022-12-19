@@ -1,16 +1,15 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: http-vs
+  name: ping
 spec:
   hosts:
-    - "*"
+  - "*"
   gateways:
-    - http-gateway
+  - ping-web
   http:
   - route:
     - destination:
         port:
-           number: 8888 
+          number: 8888
         host: ping.default.svc.cluster.local
-        subset: v1
