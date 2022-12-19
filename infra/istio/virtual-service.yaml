@@ -7,13 +7,10 @@ spec:
     - "*"
   gateways:
     - grpc-gateway
-  tcp:
-  - match:
-      - port: 80
-    route:
+  http:
+  - route:
     - destination:
         port:
            number: 80 
         host: ping.default.svc.cluster.local
         subset: v1
-      weight: 100

@@ -3,7 +3,6 @@ kind: Service
 metadata:
   name: {{ include "ping.fullname" . }}
   labels:
-    version: v1
     {{- include "ping.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
