@@ -26,3 +26,22 @@ resource "helm_release" "argocd_service" {
     file("../infra/argocd/values.yaml")
   ]
 }
+
+resource "kubernetes_secret" "argocd_ping_pong_repo" {
+    metadata {
+        name = "ping-pong-repository"
+        namespace = "argocd"
+        labels = {
+            "argocd.argoproj.io/secret-type" = "repository"
+        }
+    }
+
+    data = {
+        type = "git"
+        url = "https://github.com/PanagiotisPtr/ping-pong"
+    }
+
+    depends_on = [
+        helm_release.argocd_service
+    ]
+}
