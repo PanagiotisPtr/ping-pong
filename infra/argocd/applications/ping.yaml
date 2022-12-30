@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ping-application
+  namespace: argocd
+  labels:
+    name: ping
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/PanagiotisPtr/ping-pong.git
+    targetRevision: main
+    path: services/ping/deploy
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ping-pong
+
+  # Sync policy
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+    - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

@@ -13,6 +13,16 @@ provider "helm" {
   }
 }
 
+resource "kubernetes_namespace" "ping_pong_ns" {
+  metadata {
+    labels = {
+      app = "ping-pong"
+    }
+
+    name = "ping-pong"
+  }
+}
+
 resource "helm_release" "argocd_service" {
   name  = "argocd"
 
@@ -43,5 +53,21 @@ resource "kubernetes_secret" "argocd_ping_pong_repo" {
 
     depends_on = [
         helm_release.argocd_service
+    ]
+}
+
+resource "kubernetes_manifest" "argocd_pong_app" {
+    manifest = yamldecode(file("../infra/argocd/applications/pong.yaml"))
+
+    depends_on = [
+        kubernetes_namespace.ping_pong_ns
+    ]
+}
+
+resource "kubernetes_manifest" "argocd_ping_app" {
+    manifest = yamldecode(file("../infra/argocd/applications/ping.yaml"))
+
+    depends_on = [
+        kubernetes_namespace.ping_pong_ns
     ]
 }
