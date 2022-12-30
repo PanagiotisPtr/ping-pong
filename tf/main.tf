@@ -1,6 +1,10 @@
+variable "kube_context" {
+    type = string
+}
+
 provider "kubernetes" {
   config_path    = "~/.kube/config"
-  config_context = "context"
+  config_context = var.kube_context
 }
 
 provider "helm" {
