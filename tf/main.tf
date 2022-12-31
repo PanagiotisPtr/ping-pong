@@ -34,9 +34,9 @@ resource "kubernetes_namespace" "monitoring_ns" {
 }
 
 resource "random_password" "grafana_password" {
-  length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+    length           = 16
+    special          = true
+    override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 resource "kubernetes_secret" "grafana_credentials" {
@@ -121,5 +121,23 @@ resource "helm_release" "grafana_service" {
         kubernetes_namespace.monitoring_ns,
         helm_release.prometheus_service,
         kubernetes_secret.grafana_credentials
+    ]
+}
+
+resource "kubernetes_config_map" "grafana_kubernetes_dashboard" {
+    metadata {
+        labels = {
+            "grafana_dashboard" = "1"
+        }
+        name = "kubernetes-cluster-monitoring-via-prometheus"
+        namespace = "monitoring"
+    }
+
+    data = {
+        "kubernetes-cluster-monitoring-via-prometheus.json" = "${file("../infra/grafana/dashboards/kubernetes-cluster-monitoring-via-prometheus.json")}"
+    }
+
+    depends_on = [
+        helm_release.grafana_service
     ]
 }
