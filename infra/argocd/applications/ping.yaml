@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ping-application
+  name: ping
   namespace: argocd
   labels:
     name: ping

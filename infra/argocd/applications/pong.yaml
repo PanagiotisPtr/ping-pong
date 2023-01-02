@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: pong-application
+  name: pong
   namespace: argocd
   labels:
     name: pong

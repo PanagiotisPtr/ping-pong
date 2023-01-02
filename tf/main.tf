@@ -2,6 +2,10 @@ variable "kube_context" {
     type = string
 }
 
+variable "vpn_cidr" {
+    type = string
+}
+
 provider "kubernetes" {
     config_path    = "~/.kube/config"
     config_context = var.kube_context
@@ -36,6 +40,12 @@ resource "kubernetes_namespace" "monitoring_ns" {
 resource "random_password" "grafana_password" {
     length           = 16
     special          = true
+    override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "random_password" "elasticsearch_password" {
+    length           = 16
+    special          = false
     override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
@@ -117,10 +127,18 @@ resource "helm_release" "grafana_service" {
         file("../infra/grafana/values.yaml")
     ]
 
+    set {
+      name = "service.loadBalancerSourceRanges"
+      value = "{${var.vpn_cidr}}"
+    }
+
+    timeout = 900
+
     depends_on = [
         kubernetes_namespace.monitoring_ns,
         helm_release.prometheus_service,
-        kubernetes_secret.grafana_credentials
+        kubernetes_secret.grafana_credentials,
+        kubernetes_config_map.grafana_kubernetes_dashboard
     ]
 }
 
@@ -138,6 +156,119 @@ resource "kubernetes_config_map" "grafana_kubernetes_dashboard" {
     }
 
     depends_on = [
-        helm_release.grafana_service
+        kubernetes_namespace.monitoring_ns,
+        helm_release.prometheus_service,
+        kubernetes_secret.grafana_credentials
+    ]
+}
+
+resource "kubernetes_secret" "escluster_credentials" {
+    metadata {
+        name = "escluster-admin-credentials"
+        namespace = "monitoring"
+    }
+
+    type = "kubernetes.io/basic-auth"
+
+    data = {
+        username = "admin"
+        password = random_password.elasticsearch_password.result
+        roles = "superuser"
+    }
+
+    depends_on = [
+        random_password.elasticsearch_password
+    ]
+}
+
+resource "kubernetes_manifest" "elasticsearch_service" {
+    field_manager {
+        force_conflicts = true
+    }
+
+    manifest = yamldecode(file("../infra/elastic/elasticsearch-cluster.yaml"))
+
+    computed_fields = ["metadata.labels", "metadata.annotations", "spec", "status"]
+
+    depends_on = [
+        kubernetes_secret.escluster_credentials,
+        kubernetes_namespace.monitoring_ns
+    ]
+}
+
+resource "kubernetes_manifest" "kibana_service" {
+    manifest = {
+        apiVersion = "kibana.k8s.elastic.co/v1"
+        kind       = "Kibana"
+
+        metadata   = {
+            name      = "kibana"
+            namespace = "monitoring"
+        }
+
+        spec = {
+            version          = "8.5.2"
+            count            = 1
+            elasticsearchRef = {
+                name = "escluster"
+            }
+            http = {
+                tls = {
+                    selfSignedCertificate = {
+                        disabled = true
+                    }
+                }
+                service = {
+                    spec = {
+                        type = "LoadBalancer"
+                        loadBalancerSourceRanges = [
+                            var.vpn_cidr
+                        ]
+                    }
+                }
+            }
+        }
+    }
+
+    depends_on = [
+        kubernetes_namespace.monitoring_ns,
+        kubernetes_manifest.elasticsearch_service
+    ]
+
+    timeouts {
+        create = "10m"
+        update = "10m"
+        delete = "10m"
+    }
+}
+
+resource "kubernetes_manifest" "fluentd_configmap" {
+    manifest = yamldecode(file("../infra/fluentd/fluentd-config.yaml"))
+
+    depends_on = [
+        random_password.elasticsearch_password,
+        kubernetes_manifest.elasticsearch_service,
+        kubernetes_namespace.monitoring_ns
+    ]
+}
+ 
+resource "helm_release" "fluentd_daemnonset" {
+    name  = "fluentd"
+
+    repository       = "https://fluent.github.io/helm-charts"
+    chart            = "fluentd"
+    namespace        = "monitoring"
+    version          = "0.3.9"
+    create_namespace = false
+
+    values = [
+        file("../infra/fluentd/values.yaml")
+    ]
+
+    depends_on = [
+        random_password.elasticsearch_password,
+        kubernetes_manifest.elasticsearch_service,
+        kubernetes_namespace.monitoring_ns,
+        kubernetes_manifest.fluentd_configmap
     ]
 }
